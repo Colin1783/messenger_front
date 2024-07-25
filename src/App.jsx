@@ -1,13 +1,14 @@
 import React from 'react';
 import {BrowserRouter as Router, Navigate, Route, Routes} from 'react-router-dom';
 import {useSelector} from 'react-redux';
-import {LoginPage} from './LoginPage';
-import {Home} from './Home';
-import {MainPage} from './MainPage';
-import {ChatContainer} from './ChatContainer';
-import {ChatPage} from './ChatPage';
-import {SettingsPage} from './SettingsPage';
-import {RegisterPage} from './RegisterPage';
+import {LoginPage} from "./pages/LoginPage.jsx";
+import {RegisterPage} from "./pages/RegisterPage.jsx";
+import {Home} from "./pages/Home.jsx";
+import {MainPage} from "./pages/MainPage.jsx";
+import {ChatContainer} from "./pages/ChatContainer.jsx";
+import {ChatPage} from "./pages/ChatPage.jsx";
+import {SettingsPage} from "./pages/SettingsPage.jsx";
+
 
 const App = () => {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);

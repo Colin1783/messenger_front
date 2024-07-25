@@ -3,7 +3,7 @@ import {useDispatch} from 'react-redux';
 import {AppBar, Box, Button, IconButton, TextField, Toolbar, Typography} from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import {useNavigate} from 'react-router-dom';
-import {logout} from "./authSlice.jsx";
+import {logout} from "../redux/authSlice.jsx";
 
 const Header = () => {
   const navigate = useNavigate();
