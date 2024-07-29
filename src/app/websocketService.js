@@ -4,7 +4,7 @@ import {Client} from '@stomp/stompjs';
 let stompClient = null;
 
 export const connect = (onMessageReceived) => {
-  const token = localStorage.getItem('token'); // JWT 토큰을 로컬 스토리지에서 가져오기
+  const token = localStorage.getItem('token');
 
   if (!token) {
     console.error('No token found in localStorage');
@@ -23,10 +23,10 @@ export const connect = (onMessageReceived) => {
       console.log('Connected to WebSocket');
       console.log('Connected with headers:', frame.headers);
 
-      // initialConnect 메시지 전송
+      // 초기 메시지 전송
       stompClient.publish({
         destination: '/app/initialConnect',
-        body: JSON.stringify({ message: 'Initial connection' })
+        body: JSON.stringify({ token: `Bearer ${token}` })
       });
 
       stompClient.subscribe('/topic/messages', (message) => {

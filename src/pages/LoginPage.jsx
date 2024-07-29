@@ -19,7 +19,7 @@ export const LoginPage = () => {
         username,
         password,
       });
-      const { jwt, user } = response.data;
+      const { jwt, user } = response.data; // 응답에서 jwt와 user를 가져옴
       dispatch(login({ token: jwt, user }));
       navigate('/');
     } catch (err) {
