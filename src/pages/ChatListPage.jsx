@@ -2,15 +2,17 @@ import React, {useEffect, useState} from 'react';
 import axiosInstance from '../utils/axiosInstance';
 import {List, ListItem, ListItemText} from '@mui/material';
 import {useNavigate} from 'react-router-dom';
+import {useSelector} from 'react-redux';
 
 export const ChatListPage = () => {
   const [chatRooms, setChatRooms] = useState([]);
   const navigate = useNavigate();
+  const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {
     const fetchChatRooms = async () => {
       try {
-        const response = await axiosInstance.get('/chatrooms');
+        const response = await axiosInstance.get(`/chatrooms/user/${user.id}`);
         if (response.data) {
           setChatRooms(response.data);
         } else {
@@ -21,8 +23,10 @@ export const ChatListPage = () => {
       }
     };
 
-    fetchChatRooms();
-  }, []);
+    if (user && user.id) {
+      fetchChatRooms();
+    }
+  }, [user]);
 
   const handleRoomClick = (roomId) => {
     navigate(`/chat/${roomId}`);
@@ -35,7 +39,7 @@ export const ChatListPage = () => {
           <ListItem key={room.id} button onClick={() => handleRoomClick(room.id)}>
             <ListItemText
               primary={room.name}
-              secondary={room.latestMessage ? `${room.latestMessage.sender}: ${room.latestMessage.content}` : 'No messages yet'}
+              secondary={room.latestMessage ? `${room.latestMessage.content}` : 'No messages yet'}
             />
           </ListItem>
         ))

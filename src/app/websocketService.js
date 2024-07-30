@@ -1,5 +1,6 @@
 import SockJS from 'sockjs-client';
 import {Client} from '@stomp/stompjs';
+import axiosInstance from '../utils/axiosInstance';
 
 let stompClient = null;
 
@@ -10,6 +11,8 @@ export const connect = (onMessageReceived, chatRoomId) => {
     console.error('No token found in localStorage');
     return;
   }
+
+  console.log('Connecting to WebSocket with chatRoomId:', chatRoomId);
 
   const socketUrl = `http://localhost:8080/ws?token=${token}`;
   const socket = new SockJS(socketUrl);
@@ -30,7 +33,9 @@ export const connect = (onMessageReceived, chatRoomId) => {
       });
 
       // 특정 채팅방 구독
-      stompClient.subscribe(`/topic/chat/${chatRoomId}`, (message) => {
+      const topic = `/topic/chat/${chatRoomId}`;
+      console.log('Subscribing to topic:', topic);
+      stompClient.subscribe(topic, (message) => {
         console.log('Message received from WebSocket:', message);
         try {
           onMessageReceived(JSON.parse(message.body));
@@ -65,8 +70,21 @@ export const disconnect = () => {
   }
 };
 
-export const sendMessage = (message) => {
+export const sendMessage = async (message) => {
   if (stompClient && stompClient.connected) {
+    // HTTP POST 요청을 통해 메시지를 서버에 저장
+    try {
+      await axiosInstance.post('/messages', {
+        chatRoomId: message.chatRoomId,
+        senderId: message.senderId,
+        content: message.content,
+        username: message.username,
+      });
+    } catch (error) {
+      console.error('Failed to save message:', error);
+    }
+
+    // WebSocket을 통해 메시지를 전송
     stompClient.publish({
       destination: '/app/chat',
       body: JSON.stringify(message)
