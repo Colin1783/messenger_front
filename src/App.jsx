@@ -8,27 +8,14 @@ import {MainPage} from "./pages/MainPage.jsx";
 import {ChatContainer} from "./pages/ChatContainer.jsx";
 import {ChatPage} from "./pages/ChatPage.jsx";
 import {SettingsPage} from "./pages/SettingsPage.jsx";
-import {login, logout} from './redux/authSlice';
+import {FriendsListPage} from "./pages/FriendsListPage.jsx"; // Import FriendsListPage
+import {logout} from './redux/authSlice';
 import {connect, disconnect} from "./app/websocketService.js";
+import NotificationComponent from "./components/NotificationComponent.jsx";
 
 const App = () => {
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-
-  useEffect(() => {
-    // Component mount 시 localStorage에서 token과 user를 가져와 redux에 설정
-    const token = localStorage.getItem('token');
-    const user = localStorage.getItem('user');
-    if (token && user) {
-      try {
-        const parsedUser = JSON.parse(user);
-        dispatch(login({ token, user: parsedUser }));
-      } catch (error) {
-        console.error("Failed to parse user from localStorage:", error);
-        dispatch(logout());
-      }
-    }
-  }, [dispatch]);
 
   useEffect(() => {
     console.log("isAuthenticated state changed:", isAuthenticated);
@@ -63,8 +50,10 @@ const App = () => {
             <Route path=":id" element={<ChatPage />} />
           </Route>
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="friends" element={<FriendsListPage />} /> {/* Add FriendsListPage route */}
         </Route>
       </Routes>
+      {isAuthenticated && <NotificationComponent />} {/* Add NotificationComponent here */}
     </Router>
   );
 };

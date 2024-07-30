@@ -2,10 +2,11 @@ import React from 'react';
 import {List, ListItem, ListItemIcon} from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import ChatIcon from '@mui/icons-material/Chat';
+import PeopleIcon from '@mui/icons-material/People'; // Import PeopleIcon
 import {useNavigate} from 'react-router-dom';
 import Box from '@mui/material/Box';
 
-const NavBar = () => {
+export const NavBar = () => {
   const navigate = useNavigate();
 
   return (
@@ -21,9 +22,12 @@ const NavBar = () => {
             <ChatIcon />
           </ListItemIcon>
         </ListItem>
+        <ListItem button onClick={() => navigate('/friends')}>
+          <ListItemIcon>
+            <PeopleIcon />
+          </ListItemIcon>
+        </ListItem>
       </List>
     </Box>
   );
 };
-
-export default NavBar;

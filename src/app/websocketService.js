@@ -3,7 +3,7 @@ import {Client} from '@stomp/stompjs';
 
 let stompClient = null;
 
-export const connect = (onMessageReceived) => {
+export const connect = (onMessageReceived, chatRoomId) => {
   const token = localStorage.getItem('token');
 
   if (!token) {
@@ -29,9 +29,14 @@ export const connect = (onMessageReceived) => {
         body: JSON.stringify({ token: `Bearer ${token}` })
       });
 
-      stompClient.subscribe('/topic/messages', (message) => {
+      // 특정 채팅방 구독
+      stompClient.subscribe(`/topic/chat/${chatRoomId}`, (message) => {
         console.log('Message received from WebSocket:', message);
-        onMessageReceived(JSON.parse(message.body));
+        try {
+          onMessageReceived(JSON.parse(message.body));
+        } catch (e) {
+          console.error('Error parsing message:', e);
+        }
       });
     },
     onStompError: (frame) => {

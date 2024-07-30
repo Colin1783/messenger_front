@@ -27,6 +27,10 @@ export const LoginPage = () => {
     }
   };
 
+  const handleNavigateToRegister = () => {
+    navigate('/register');
+  };
+
   return (
     <Container maxWidth="sm">
       <Box mt={5}>
@@ -62,6 +66,16 @@ export const LoginPage = () => {
             Login
           </Button>
         </form>
+        <Box mt={2}>
+          <Button
+            variant="outlined"
+            color="primary"
+            fullWidth
+            onClick={handleNavigateToRegister}
+          >
+            Register
+          </Button>
+        </Box>
       </Box>
     </Container>
   );
