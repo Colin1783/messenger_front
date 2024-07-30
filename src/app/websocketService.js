@@ -1,6 +1,5 @@
 import SockJS from 'sockjs-client';
 import {Client} from '@stomp/stompjs';
-import axiosInstance from '../utils/axiosInstance';
 
 let stompClient = null;
 
@@ -12,7 +11,10 @@ export const connect = (onMessageReceived, chatRoomId) => {
     return;
   }
 
-  console.log('Connecting to WebSocket with chatRoomId:', chatRoomId);
+  if (!chatRoomId) {
+    console.error('No chatRoomId provided');
+    return;
+  }
 
   const socketUrl = `http://localhost:8080/ws?token=${token}`;
   const socket = new SockJS(socketUrl);
@@ -33,9 +35,7 @@ export const connect = (onMessageReceived, chatRoomId) => {
       });
 
       // 특정 채팅방 구독
-      const topic = `/topic/chat/${chatRoomId}`;
-      console.log('Subscribing to topic:', topic);
-      stompClient.subscribe(topic, (message) => {
+      stompClient.subscribe(`/topic/chat/${chatRoomId}`, (message) => {
         console.log('Message received from WebSocket:', message);
         try {
           onMessageReceived(JSON.parse(message.body));
@@ -70,21 +70,8 @@ export const disconnect = () => {
   }
 };
 
-export const sendMessage = async (message) => {
+export const sendMessage = (message) => {
   if (stompClient && stompClient.connected) {
-    // HTTP POST 요청을 통해 메시지를 서버에 저장
-    try {
-      await axiosInstance.post('/messages', {
-        chatRoomId: message.chatRoomId,
-        senderId: message.senderId,
-        content: message.content,
-        username: message.username,
-      });
-    } catch (error) {
-      console.error('Failed to save message:', error);
-    }
-
-    // WebSocket을 통해 메시지를 전송
     stompClient.publish({
       destination: '/app/chat',
       body: JSON.stringify(message)
