@@ -96,7 +96,7 @@ export const sendMessage = async (message) => {
         destination: '/app/chat',
         body: JSON.stringify(response.data)
       });
-      // console.log('Message sent via WebSocket:', response.data);
+      console.log('Message sent via WebSocket:', response.data);
     } else {
       console.error('Stomp client is not connected');
     }
