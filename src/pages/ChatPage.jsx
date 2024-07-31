@@ -59,6 +59,7 @@ export const ChatPage = () => {
   }, [messages]);
 
   const onMessageReceived = (msg) => {
+    console.log('onMessageReceived called with message:', msg);
     const formattedMsg = {
       ...msg,
       createdAt: new Date(msg.created_at).toISOString(),

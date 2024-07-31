@@ -4,6 +4,7 @@ import axiosInstance from '../utils/axiosInstance';
 
 let stompClient = null;
 let isConnected = false;
+let subscriptions = {};
 
 export const connect = (onMessageReceived, chatRoomId) => {
   const token = localStorage.getItem('token');
@@ -12,11 +13,6 @@ export const connect = (onMessageReceived, chatRoomId) => {
 
   if (!token) {
     console.error('No token found in localStorage');
-    return;
-  }
-
-  if (!chatRoomId) {
-    console.error('No chatRoomId provided');
     return;
   }
 
@@ -34,28 +30,14 @@ export const connect = (onMessageReceived, chatRoomId) => {
 
       isConnected = true;
 
-      stompClient.subscribe(`/topic/chat/${chatRoomId}`, (message) => {
-        console.log('Message received from WebSocket:', message);
-        try {
-          onMessageReceived(JSON.parse(message.body));
-        } catch (e) {
-          console.error('Error parsing message:', e);
-        }
-      });
+      if (chatRoomId) {
+        subscribeToTopic(`/topic/chat/${chatRoomId}`, onMessageReceived);
+      }
 
-      // 친구 요청 알림을 위한 구독
-      stompClient.subscribe(`/topic/friendRequests/${userId}`, (message) => {
-        console.log('Friend request notification received:', message);
-        try {
-          const notification = JSON.parse(message.body);
-          console.log('Parsed friend request notification:', notification);
-          onMessageReceived(notification);
-        } catch (e) {
-          console.error('Error parsing friend request notification:', e);
-        }
-      });
+      if (userId) {
+        subscribeToTopic(`/topic/friendRequests/${userId}`, onMessageReceived);
+      }
 
-      // Initial connection 메시지 발행
       stompClient.publish({
         destination: '/app/initialConnect',
         body: JSON.stringify({ token: `Bearer ${token}` })
@@ -79,8 +61,32 @@ export const connect = (onMessageReceived, chatRoomId) => {
   stompClient.activate();
 };
 
+export const subscribeToTopic = (topic, onMessageReceived) => {
+  if (isConnected && !subscriptions[topic]) {
+    subscriptions[topic] = stompClient.subscribe(topic, (message) => {
+      console.log('Message received from WebSocket:', message);
+      try {
+        onMessageReceived(JSON.parse(message.body));
+      } catch (e) {
+        console.error('Error parsing message:', e);
+      }
+    });
+  }
+};
+
+export const unsubscribeFromTopic = (topic) => {
+  if (subscriptions[topic]) {
+    subscriptions[topic].unsubscribe();
+    delete subscriptions[topic];
+  }
+};
+
 export const disconnect = () => {
   if (stompClient !== null) {
+    for (const topic in subscriptions) {
+      subscriptions[topic].unsubscribe();
+    }
+    subscriptions = {};
     stompClient.deactivate();
     isConnected = false;
     console.log('Disconnected from WebSocket');
