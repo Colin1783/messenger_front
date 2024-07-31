@@ -1,11 +1,12 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useParams} from 'react-router-dom';
 import {connect, disconnect, sendMessage} from '../app/websocketService';
 import {useDispatch, useSelector} from 'react-redux';
-import {Box, Button, CircularProgress, TextField, Typography} from '@mui/material';
+import {Box, Button, CircularProgress, Paper, TextField, Typography} from '@mui/material';
 import axiosInstance from '../utils/axiosInstance';
 import {addMessage} from '../redux/chatSlice.js';
 import {format, parseISO} from 'date-fns';
+import {ko} from 'date-fns/locale';
 
 export const ChatPage = () => {
   const { id } = useParams();
@@ -14,19 +15,25 @@ export const ChatPage = () => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
+  const messagesEndRef = useRef(null);
+
+  const formatDate = (dateString) => {
+    const date = parseISO(dateString);
+    return format(date, "yyyy-MM-dd a h:mm", { locale: ko });
+  };
 
   useEffect(() => {
     const fetchMessages = async () => {
       try {
         const response = await axiosInstance.get(`/messages/chatroom/${id}`);
         if (response.data) {
-          const validMessages = response.data.map(msg => ({
+          const validMessages = response.data.map((msg) => ({
             ...msg,
             chatRoomId: msg.chatRoomId || id,
             senderId: msg.senderId || 'Unknown',
-            createdAt: msg.createdAt || new Date().toISOString().slice(0, 19).replace('T', ' ')
+            createdAt: msg.createdAt || new Date().toISOString().slice(0, 19).replace('T', ' '),
           }));
-          validMessages.forEach(msg => {
+          validMessages.forEach((msg) => {
             console.log('Fetched message:', msg);
             dispatch(addMessage(msg));
           });
@@ -49,13 +56,25 @@ export const ChatPage = () => {
     };
   }, [id, dispatch]);
 
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   const onMessageReceived = (msg) => {
     console.log('Message received from WebSocket:', msg);
-    if (msg.created_at) {
-      // created_at의 형식을 ISO 8601로 변환
-      msg.createdAt = msg.created_at.replace(' ', 'T');
+
+    const formattedMsg = {
+      ...msg,
+      createdAt: new Date(msg.created_at).toISOString(),  // 날짜 형식 변환 및 필드 이름 변경
+      created_at: undefined,  // 원본 필드 제거
+    };
+
+    console.log('Formatted message:', formattedMsg);
+
+    if (!messages.find((m) => m.id === formattedMsg.id && m.createdAt === formattedMsg.createdAt)) {
+      console.log('Adding message to state:', formattedMsg);
+      dispatch(addMessage(formattedMsg));
     }
-    dispatch(addMessage(msg));
   };
 
   const handleSend = async (e) => {
@@ -66,13 +85,21 @@ export const ChatPage = () => {
         content: message,
         senderId: user.id,
         username: user.username,
-        createdAt: new Date().toISOString().slice(0, 19).replace('T', ' ')
+        createdAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
       };
       console.log('Sending message:', messageData);
       sendMessage(messageData);
       setMessage('');
     }
   };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      handleSend(e);
+    }
+  };
+
+  console.log('Rendering ChatPage with messages:', messages);
 
   if (loading) {
     return (
@@ -91,30 +118,40 @@ export const ChatPage = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>Chat Room {id}</Typography>
-      <Box sx={{ mb: 2, border: '1px solid #ccc', borderRadius: 1, p: 2, height: '400px', overflowY: 'scroll' }}>
+    <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#fff' }}>
+      <Box sx={{ flexGrow: 1, mb: 2, border: '1px solid #ccc', borderRadius: 1, p: 2, overflowY: 'scroll' }}>
         {messages.map((msg) => (
           <Box
-            key={`${msg.id}-${new Date(msg.createdAt).getTime()}`}
+            key={`${msg.chatRoomId}-${msg.createdAt}`}
             sx={{
               display: 'flex',
               justifyContent: Number(msg.senderId) === Number(user.id) ? 'flex-end' : 'flex-start',
               mb: 1,
             }}
           >
-            <Typography variant="body1" sx={{
-              backgroundColor: Number(msg.senderId) === Number(user.id) ? '#e0f7fa' : '#f1f8e9',
-              borderRadius: 2,
-              p: 1,
-              maxWidth: '70%',
-            }}>
-              { Number(msg.senderId) === Number(user.id) ? 'You' : msg.username}: {msg.content}
-              <br />
-              <small>{msg.createdAt ? format(parseISO(msg.createdAt), 'PPpp') : 'Unknown date'}</small>
-            </Typography>
+            <Paper
+              elevation={3}
+              sx={{
+                backgroundColor: Number(msg.senderId) === Number(user.id) ? '#cfe8fc' : '#ffffff',
+                borderRadius: 2,
+                p: 2,
+                maxWidth: '70%',
+                wordWrap: 'break-word',
+              }}
+            >
+              <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                {Number(msg.senderId) !== Number(user.id) && msg.username}
+              </Typography>
+              <Typography variant="body1">
+                {msg.content}
+              </Typography>
+              <Typography variant="caption" sx={{ display: 'block', textAlign: 'right' }}>
+                {msg.createdAt ? formatDate(msg.createdAt) : 'Unknown date'}
+              </Typography>
+            </Paper>
           </Box>
         ))}
+        <div ref={messagesEndRef} />
       </Box>
       <form onSubmit={handleSend} style={{ display: 'flex', gap: '8px' }}>
         <TextField
@@ -122,8 +159,14 @@ export const ChatPage = () => {
           fullWidth
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
+          multiline
+          minRows={1}
+          maxRows={4}
         />
-        <Button type="submit" variant="contained" color="primary">Send</Button>
+        <Button type="submit" variant="contained" color="primary">
+          Send
+        </Button>
       </form>
     </Box>
   );

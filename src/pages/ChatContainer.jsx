@@ -1,4 +1,3 @@
-// src/pages/ChatContainer.jsx
 import React from 'react';
 import {Outlet, useParams} from 'react-router-dom';
 import {Box, Typography} from '@mui/material';
@@ -8,8 +7,8 @@ export const ChatContainer = () => {
   const { id } = useParams();
 
   return (
-    <Box display="flex" height="100vh">
-      <Box sx={{ width: '30%', borderRight: '1px solid #ccc' }}>
+    <Box display="flex" height="100vh" sx={{backgroundColor: '#fff'}}>
+      <Box sx={{ width: '25%', borderRight: '1px solid #ccc', backgroundColor: '#f5f5f5' }}>
         <ChatListPage />
       </Box>
       <Box sx={{ flexGrow: 1, padding: 2 }}>

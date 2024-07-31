@@ -1,10 +1,13 @@
 import SockJS from 'sockjs-client';
 import {Client} from '@stomp/stompjs';
+import axiosInstance from '../utils/axiosInstance';
 
 let stompClient = null;
 
 export const connect = (onMessageReceived, chatRoomId) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token')
+  const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+  const userId = user ? user.id : null;
 
   if (!token) {
     console.error('No token found in localStorage');
@@ -28,19 +31,30 @@ export const connect = (onMessageReceived, chatRoomId) => {
       console.log('Connected to WebSocket');
       console.log('Connected with headers:', frame.headers);
 
-      // 초기 메시지 전송
       stompClient.publish({
         destination: '/app/initialConnect',
         body: JSON.stringify({ token: `Bearer ${token}` })
       });
 
-      // 특정 채팅방 구독
       stompClient.subscribe(`/topic/chat/${chatRoomId}`, (message) => {
         console.log('Message received from WebSocket:', message);
         try {
           onMessageReceived(JSON.parse(message.body));
         } catch (e) {
           console.error('Error parsing message:', e);
+        }
+      });
+
+      // 친구 요청 알림을 위한 구독
+      stompClient.subscribe(`/topic/friendRequests/${userId}`, (message) => {
+        console.log('Friend request notification received:', message);
+        try {
+          const notification = JSON.parse(message.body);
+          if (notification.type === 'friendRequestAccepted') {
+            onMessageReceived(notification);
+          }
+        } catch (e) {
+          console.error('Error parsing friend request notification:', e);
         }
       });
     },
@@ -70,14 +84,23 @@ export const disconnect = () => {
   }
 };
 
-export const sendMessage = (message) => {
-  if (stompClient && stompClient.connected) {
-    stompClient.publish({
-      destination: '/app/chat',
-      body: JSON.stringify(message)
-    });
-    console.log('Message sent:', message);
-  } else {
-    console.error('Stomp client is not connected');
+export const sendMessage = async (message) => {
+  console.log('Message data before sending:', message);  // 메시지 데이터 로그 추가
+  try {
+    const response = await axiosInstance.post('/messages', message);
+    console.log('Message saved to server:', response.data);
+
+    if (stompClient && stompClient.connected) {
+      console.log('Message data before WebSocket publish:', response.data);  // WebSocket 전송 전 메시지 데이터 로그 추가
+      stompClient.publish({
+        destination: '/app/chat',
+        body: JSON.stringify(response.data)
+      });
+      console.log('Message sent via WebSocket:', response.data);
+    } else {
+      console.error('Stomp client is not connected');
+    }
+  } catch (error) {
+    console.error('Failed to save message:', error);
   }
 };

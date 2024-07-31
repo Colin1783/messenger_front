@@ -12,6 +12,10 @@ export const ChatListPage = () => {
   useEffect(() => {
     const fetchChatRooms = async () => {
       try {
+        if (!user || !user.id) {
+          console.error('User is not authenticated');
+          return;
+        }
         const response = await axiosInstance.get(`/chatrooms/user/${user.id}`);
         if (response.data) {
           setChatRooms(response.data);
