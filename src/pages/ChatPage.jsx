@@ -9,7 +9,7 @@ import {format, parseISO} from 'date-fns';
 import {ko} from 'date-fns/locale';
 
 export const ChatPage = () => {
-  const { id } = useParams();
+  const { id: chatRoomId } = useParams();
   const user = useSelector((state) => state.auth.user);
   const messages = useSelector((state) => state.chat.messages);
   const [message, setMessage] = useState('');
@@ -25,11 +25,11 @@ export const ChatPage = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const response = await axiosInstance.get(`/messages/chatroom/${id}`);
+        const response = await axiosInstance.get(`/messages/chatroom/${chatRoomId}`);
         if (response.data) {
           const validMessages = response.data.map((msg) => ({
             ...msg,
-            chatRoomId: msg.chatRoomId || id,
+            chatRoomId: msg.chatRoomId || chatRoomId,
             senderId: msg.senderId || 'Unknown',
             createdAt: msg.createdAt || new Date().toISOString().slice(0, 19).replace('T', ' '),
           }));
@@ -44,15 +44,15 @@ export const ChatPage = () => {
       }
     };
 
-    if (id) {
+    if (chatRoomId) {
       fetchMessages();
-      connect(onMessageReceived, id, dispatch, user.id);
+      connect(onMessageReceived, chatRoomId);
     }
 
     return () => {
       disconnect();
     };
-  }, [id, dispatch]);
+  }, [chatRoomId, dispatch]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -74,7 +74,7 @@ export const ChatPage = () => {
     e.preventDefault();
     if (message.trim()) {
       const messageData = {
-        chatRoomId: id,
+        chatRoomId,
         content: message,
         senderId: user.id,
         username: user.username,
@@ -99,7 +99,7 @@ export const ChatPage = () => {
     );
   }
 
-  if (!id) {
+  if (!chatRoomId) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <Typography variant="h6">Loading chat room...</Typography>

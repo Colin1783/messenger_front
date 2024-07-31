@@ -1,5 +1,5 @@
 import React from 'react';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {AppBar, Box, Button, IconButton, TextField, Toolbar, Typography} from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import {useNavigate} from 'react-router-dom';
@@ -8,6 +8,7 @@ import {logout} from "../redux/authSlice.jsx";
 const Header = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user); // 현재 로그인한 사용자 정보를 가져옴
 
   const handleLogout = () => {
     dispatch(logout()); // Redux 스토어에서 로그아웃 처리
@@ -55,6 +56,11 @@ const Header = () => {
             <Typography variant="button" color="inherit">검색</Typography>
           </Button>
         </Box>
+        {user && ( // user가 존재할 때만 환영 메시지를 표시
+          <Typography variant="body1" sx={{ marginRight: 2 }}>
+            {user.username} 님 환영합니다.
+          </Typography>
+        )}
         <IconButton color="inherit" onClick={() => navigate('/settings')}>
           <SettingsIcon />
         </IconButton>

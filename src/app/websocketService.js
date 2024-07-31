@@ -3,9 +3,10 @@ import {Client} from '@stomp/stompjs';
 import axiosInstance from '../utils/axiosInstance';
 
 let stompClient = null;
+let isConnected = false;
 
 export const connect = (onMessageReceived, chatRoomId) => {
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem('token');
   const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
   const userId = user ? user.id : null;
 
@@ -31,10 +32,7 @@ export const connect = (onMessageReceived, chatRoomId) => {
       console.log('Connected to WebSocket');
       console.log('Connected with headers:', frame.headers);
 
-      stompClient.publish({
-        destination: '/app/initialConnect',
-        body: JSON.stringify({ token: `Bearer ${token}` })
-      });
+      isConnected = true;
 
       stompClient.subscribe(`/topic/chat/${chatRoomId}`, (message) => {
         console.log('Message received from WebSocket:', message);
@@ -50,12 +48,17 @@ export const connect = (onMessageReceived, chatRoomId) => {
         console.log('Friend request notification received:', message);
         try {
           const notification = JSON.parse(message.body);
-          if (notification.type === 'friendRequestAccepted') {
-            onMessageReceived(notification);
-          }
+          console.log('Parsed friend request notification:', notification);
+          onMessageReceived(notification);
         } catch (e) {
           console.error('Error parsing friend request notification:', e);
         }
+      });
+
+      // Initial connection 메시지 발행
+      stompClient.publish({
+        destination: '/app/initialConnect',
+        body: JSON.stringify({ token: `Bearer ${token}` })
       });
     },
     onStompError: (frame) => {
@@ -64,6 +67,7 @@ export const connect = (onMessageReceived, chatRoomId) => {
     },
     onWebSocketClose: (evt) => {
       console.log('WebSocket closed. Attempting to reconnect...');
+      isConnected = false;
       setTimeout(() => stompClient.activate(), 5000);
     },
     onWebSocketError: (error) => {
@@ -78,10 +82,15 @@ export const connect = (onMessageReceived, chatRoomId) => {
 export const disconnect = () => {
   if (stompClient !== null) {
     stompClient.deactivate();
+    isConnected = false;
     console.log('Disconnected from WebSocket');
   } else {
     console.log('No active WebSocket connection to disconnect');
   }
+};
+
+export const isStompConnected = () => {
+  return isConnected;
 };
 
 export const sendMessage = async (message) => {
@@ -90,7 +99,7 @@ export const sendMessage = async (message) => {
     const response = await axiosInstance.post('/messages', message);
     console.log('Message saved to server:', response.data);
 
-    if (stompClient && stompClient.connected) {
+    if (isConnected) {
       console.log('Message data before WebSocket publish:', response.data);  // WebSocket 전송 전 메시지 데이터 로그 추가
       stompClient.publish({
         destination: '/app/chat',

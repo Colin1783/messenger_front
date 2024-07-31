@@ -1,17 +1,19 @@
 import React, {useEffect, useState} from 'react';
 import axiosInstance from '../utils/axiosInstance';
 import {Button, List, ListItem, ListItemText, TextField} from '@mui/material';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {useNavigate} from 'react-router-dom';
 import {connect, disconnect} from '../app/websocketService';
+import {acceptFriendRequest, addFriendRequest, setFriends, setPendingRequests} from '../redux/friendsSlice';
 
 export const FriendsListPage = () => {
   const user = useSelector((state) => state.auth.user);
   const userId = user ? user.id : null;
+  const friends = useSelector((state) => state.friends.friends);
+  const pendingRequests = useSelector((state) => state.friends.pendingRequests);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const [friends, setFriends] = useState([]);
-  const [pendingRequests, setPendingRequests] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -19,7 +21,8 @@ export const FriendsListPage = () => {
     if (!userId) return;
     try {
       const response = await axiosInstance.get(`/friends/${userId}`);
-      setFriends(response.data);
+      console.log('Fetched friends:', response.data);
+      dispatch(setFriends(response.data));
     } catch (error) {
       console.error('Failed to fetch friends:', error);
     }
@@ -29,7 +32,8 @@ export const FriendsListPage = () => {
     if (!userId) return;
     try {
       const response = await axiosInstance.get(`/friend-requests/pending/${userId}`);
-      setPendingRequests(response.data);
+      console.log('Fetched pending requests:', response.data);
+      dispatch(setPendingRequests(response.data));
     } catch (error) {
       console.error('Failed to fetch pending requests:', error);
     }
@@ -40,18 +44,21 @@ export const FriendsListPage = () => {
     fetchPendingRequests();
 
     const onMessageReceived = (message) => {
-      if (message.type === 'friendRequest' || message.type === 'friendRequestAccepted') {
-        fetchPendingRequests();
+      console.log('Message received from WebSocket:', message);
+      if (message.type === 'friendRequest') {
+        dispatch(addFriendRequest(message));
+      } else if (message.type === 'friendRequestAccepted') {
+        dispatch(acceptFriendRequest(message));
         fetchFriends();
       }
     };
 
-    connect(onMessageReceived, null); // chatRoomId를 사용하지 않음
+    connect(onMessageReceived);
 
     return () => {
       disconnect();
     };
-  }, [userId]);
+  }, [userId, dispatch]);
 
   const handleSearch = async () => {
     try {
@@ -82,7 +89,7 @@ export const FriendsListPage = () => {
         requestId,
         status,
       });
-      setPendingRequests(pendingRequests.filter(request => request.id !== requestId));
+      dispatch(setPendingRequests(pendingRequests.filter(request => request.id !== requestId)));
       if (status === 'ACCEPTED') {
         fetchFriends();
       }
