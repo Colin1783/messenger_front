@@ -34,7 +34,6 @@ export const ChatPage = () => {
             createdAt: msg.createdAt || new Date().toISOString().slice(0, 19).replace('T', ' '),
           }));
           validMessages.forEach((msg) => {
-            console.log('Fetched message:', msg);
             dispatch(addMessage(msg));
           });
         }
@@ -46,9 +45,8 @@ export const ChatPage = () => {
     };
 
     if (id) {
-      console.log('Connecting to WebSocket with chatRoomId:', id);
       fetchMessages();
-      connect(onMessageReceived, id);
+      connect(onMessageReceived, id, dispatch, user.id);
     }
 
     return () => {
@@ -61,18 +59,13 @@ export const ChatPage = () => {
   }, [messages]);
 
   const onMessageReceived = (msg) => {
-    console.log('Message received from WebSocket:', msg);
-
     const formattedMsg = {
       ...msg,
-      createdAt: new Date(msg.created_at).toISOString(),  // 날짜 형식 변환 및 필드 이름 변경
-      created_at: undefined,  // 원본 필드 제거
+      createdAt: new Date(msg.created_at).toISOString(),
+      created_at: undefined,
     };
 
-    console.log('Formatted message:', formattedMsg);
-
     if (!messages.find((m) => m.id === formattedMsg.id && m.createdAt === formattedMsg.createdAt)) {
-      console.log('Adding message to state:', formattedMsg);
       dispatch(addMessage(formattedMsg));
     }
   };
@@ -87,7 +80,6 @@ export const ChatPage = () => {
         username: user.username,
         createdAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
       };
-      console.log('Sending message:', messageData);
       sendMessage(messageData);
       setMessage('');
     }
@@ -98,8 +90,6 @@ export const ChatPage = () => {
       handleSend(e);
     }
   };
-
-  console.log('Rendering ChatPage with messages:', messages);
 
   if (loading) {
     return (

@@ -19,7 +19,6 @@ export const FriendsListPage = () => {
     if (!userId) return;
     try {
       const response = await axiosInstance.get(`/friends/${userId}`);
-      console.log('Friends API response:', response.data);
       setFriends(response.data);
     } catch (error) {
       console.error('Failed to fetch friends:', error);
@@ -30,7 +29,6 @@ export const FriendsListPage = () => {
     if (!userId) return;
     try {
       const response = await axiosInstance.get(`/friend-requests/pending/${userId}`);
-      console.log('Pending Requests API response:', response.data);
       setPendingRequests(response.data);
     } catch (error) {
       console.error('Failed to fetch pending requests:', error);
@@ -42,7 +40,6 @@ export const FriendsListPage = () => {
     fetchPendingRequests();
 
     const onMessageReceived = (message) => {
-      console.log('Received message:', message);
       if (message.type === 'friendRequest' || message.type === 'friendRequestAccepted') {
         fetchPendingRequests();
         fetchFriends();
@@ -59,7 +56,6 @@ export const FriendsListPage = () => {
   const handleSearch = async () => {
     try {
       const response = await axiosInstance.get(`/users/search?query=${searchQuery}`);
-      console.log('Search API response:', response.data);
       setSearchResults(response.data);
     } catch (error) {
       console.error('Failed to search users:', error);
@@ -67,7 +63,6 @@ export const FriendsListPage = () => {
   };
 
   const handleSendFriendRequest = async (recipientId) => {
-    console.log('Sending friend request:', { requesterId: userId, recipientId });
     try {
       await axiosInstance.post('/friend-requests/send', null, {
         params: {
@@ -82,7 +77,6 @@ export const FriendsListPage = () => {
   };
 
   const handleRespondToRequest = async (requestId, status) => {
-    console.log('Responding to friend request:', { requestId, status });
     try {
       await axiosInstance.post('/friend-requests/respond', {
         requestId,
@@ -123,8 +117,6 @@ export const FriendsListPage = () => {
       console.error('Failed to remove friend:', error);
     }
   };
-
-  console.log('Friends state:', friends);
 
   if (!userId) {
     return <p>Loading...</p>; // 유저 아이디를 불러올 때까지 Loading 상태 표시
