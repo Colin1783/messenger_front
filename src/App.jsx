@@ -9,9 +9,9 @@ import {ChatContainer} from "./pages/ChatContainer.jsx";
 import {ChatPage} from "./pages/ChatPage.jsx";
 import {SettingsPage} from "./pages/SettingsPage.jsx";
 import {FriendsListPage} from "./pages/FriendsListPage.jsx"; // Import FriendsListPage
-import {logout} from './redux/authSlice';
+import {logout} from './redux/authSlice.js';
 import {connect, disconnect} from "./app/websocketService.js";
-import NotificationComponent from "./components/NotificationComponent.jsx";
+import {NotificationComponent} from "./components/NotificationComponent.jsx";
 
 const App = () => {
   const dispatch = useDispatch();

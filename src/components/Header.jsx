@@ -3,7 +3,8 @@ import {useDispatch, useSelector} from 'react-redux';
 import {AppBar, Box, Button, IconButton, TextField, Toolbar, Typography} from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import {useNavigate} from 'react-router-dom';
-import {logout} from "../redux/authSlice.jsx";
+import {logout} from "../redux/authSlice";
+import {NotificationComponent} from './NotificationComponent';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -61,6 +62,7 @@ const Header = () => {
             {user.username} 님 환영합니다.
           </Typography>
         )}
+        <NotificationComponent /> {/* NotificationComponent 추가 */}
         <IconButton color="inherit" onClick={() => navigate('/settings')}>
           <SettingsIcon />
         </IconButton>

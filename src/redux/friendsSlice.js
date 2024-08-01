@@ -3,6 +3,7 @@ import {createSlice} from '@reduxjs/toolkit';
 const initialState = {
   pendingRequests: [],
   friends: [],
+  notifications: [],
 };
 
 const friendsSlice = createSlice({
@@ -23,8 +24,11 @@ const friendsSlice = createSlice({
       state.pendingRequests = state.pendingRequests.filter(request => request.requesterId !== requesterId);
       state.friends.push(action.payload);
     },
+    addNotification: (state, action) => {
+      state.notifications.push(action.payload);
+    },
   },
 });
 
-export const { setFriends, setPendingRequests, addFriendRequest, acceptFriendRequest } = friendsSlice.actions;
+export const { setFriends, setPendingRequests, addFriendRequest, acceptFriendRequest, addNotification } = friendsSlice.actions;
 export default friendsSlice.reducer;

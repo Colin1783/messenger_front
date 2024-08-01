@@ -2,7 +2,7 @@ import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {Link} from 'react-router-dom';
 import {Box, Button, Card, CardContent, Container, List, ListItem, ListItemText, Typography} from '@mui/material';
-import {logout} from "../redux/authSlice.jsx";
+import {logout} from "../redux/authSlice.js";
 
 export const MainPage = () => {
   const dispatch = useDispatch();

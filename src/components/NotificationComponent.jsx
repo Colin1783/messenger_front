@@ -1,30 +1,41 @@
-import React, {useEffect, useState} from 'react';
-import {connect} from "react-redux";
-import {disconnect} from "../app/websocketService.js";
+import React, {useEffect} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Badge, IconButton} from '@mui/material';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import {addNotification} from '../redux/notificationSlice';
 
-const NotificationComponent = () => {
-  const [notifications, setNotifications] = useState([]);
+export const NotificationComponent = () => {
+  const dispatch = useDispatch();
+  const notifications = useSelector((state) => state.notifications.notifications);
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
-    connect((message) => {
-      setNotifications((prevNotifications) => [...prevNotifications, message]);
+    const eventSourceUrl = `http://localhost:8080/friend-requests/notifications?token=${token}`;
+    const eventSource = new EventSource(eventSourceUrl);
+
+    eventSource.addEventListener("notification", function(event) {
+      console.log('New notification received:', event.data);
+      dispatch(addNotification(JSON.parse(event.data)));
     });
 
-    return () => {
-      disconnect();
+    eventSource.onerror = function(event) {
+      console.error('EventSource failed:', event);
+      eventSource.close();
     };
-  }, []);
+
+    console.log('Subscribed to EventSource for notifications.');
+
+    return () => {
+      console.log('Closing EventSource.');
+      eventSource.close();
+    };
+  }, [dispatch, token]);
 
   return (
-    <div>
-      <h2>Notifications</h2>
-      <ul>
-        {notifications.map((notification, index) => (
-          <li key={index}>{notification}</li>
-        ))}
-      </ul>
-    </div>
+    <IconButton color="inherit">
+      <Badge badgeContent={notifications.length} color="secondary">
+        <NotificationsIcon />
+      </Badge>
+    </IconButton>
   );
 };
-
-export default NotificationComponent;
