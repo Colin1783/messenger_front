@@ -12,7 +12,9 @@ import {FriendsListPage} from "./pages/friend/FriendsListPage.jsx";
 import {BoardList} from "./pages/board/BoardList.jsx";
 import {BoardWrite} from "./pages/board/BoardWrite.jsx";
 import BoardDetail from "./pages/board/BoardDetail.jsx";
-import BoardEdit from "./pages/board/BoardEdit.jsx"; // 추가된 컴포넌트
+import BoardEdit from "./pages/board/BoardEdit.jsx";
+import CalendarPage from "./pages/calendar/Calendar.jsx";
+import AddEventPage from "./pages/calendar/AddEvent.jsx";
 import {login, logout} from './redux/authSlice.js';
 import {connect, disconnect} from "./app/websocketService.js";
 import {NotificationComponent} from "./components/NotificationComponent.jsx";
@@ -150,6 +152,14 @@ const App = () => {
         {
           path: "board/edit/:id",
           element: <BoardEdit />,
+        },
+        {
+          path: "calendar",
+          element: <CalendarPage />,
+        },
+        {
+          path: "calendar/:date",
+          element: <AddEventPage />,
         },
       ],
     },

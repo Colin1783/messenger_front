@@ -1,0 +1,37 @@
+/* 날짜 칸 크기 조정*/
+.fc .fc-daygrid-day-frame {
+    min-height: 100px; /* 원하는 높이로 설정 */
+}
+
+/* 헤더 타이틀 색상 변경 */
+.fc .fc-toolbar-title {
+    color: black; /* 원하는 색상으로 변경 */
+}
+
+/* 헤더 버튼 색상 변경 */
+.fc .fc-button {
+    background-color: #007bff; /* 버튼 배경색 */
+    border-color: #007bff; /* 버튼 테두리색 */
+    color: #ffffff; /* 버튼 텍스트 색상 */
+}
+
+.fc .fc-button:hover {
+    background-color: #0056b3; /* 호버 시 버튼 배경색 */
+    border-color: #0056b3; /* 호버 시 버튼 테두리색 */
+}
+
+.fc .fc-button:focus {
+    box-shadow: none; /* 포커스 시 그림자 제거 */
+}
+
+/* 오늘 버튼 색상 변경 */
+.fc .fc-button.fc-button-today {
+    background-color: #28a745; /* 오늘 버튼 배경색 */
+    border-color: #28a745; /* 오늘 버튼 테두리색 */
+    color: #ffffff; /* 오늘 버튼 텍스트 색상 */
+}
+
+.fc .fc-button.fc-button-today:hover {
+    background-color: #218838; /* 호버 시 오늘 버튼 배경색 */
+    border-color: #218838; /* 호버 시 오늘 버튼 테두리색 */
+}
