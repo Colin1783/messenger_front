@@ -4,13 +4,12 @@ import {Button, List, ListItem, ListItemText, TextField} from '@mui/material';
 import {useDispatch, useSelector} from 'react-redux';
 import {useNavigate} from 'react-router-dom';
 import {connect, disconnect} from '../app/websocketService';
-import {acceptFriendRequest, addFriendRequest, setFriends, setPendingRequests} from '../redux/friendsSlice';
+import {acceptFriendRequest, addFriendRequest, setFriends} from '../redux/friendsSlice';
 
 export const FriendsListPage = () => {
   const user = useSelector((state) => state.auth.user);
   const userId = user ? user.id : null;
   const friends = useSelector((state) => state.friends.friends);
-  const pendingRequests = useSelector((state) => state.friends.pendingRequests);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -28,20 +27,8 @@ export const FriendsListPage = () => {
     }
   };
 
-  const fetchPendingRequests = async () => {
-    if (!userId) return;
-    try {
-      const response = await axiosInstance.get(`/friend-requests/pending/${userId}`);
-      console.log('Fetched pending requests:', response.data);
-      dispatch(setPendingRequests(response.data));
-    } catch (error) {
-      console.error('Failed to fetch pending requests:', error);
-    }
-  };
-
   useEffect(() => {
     fetchFriends();
-    fetchPendingRequests();
 
     const onMessageReceived = (message) => {
       console.log('Message received from WebSocket:', message);
@@ -80,21 +67,6 @@ export const FriendsListPage = () => {
       alert('Friend request sent!');
     } catch (error) {
       console.error('Failed to send friend request:', error);
-    }
-  };
-
-  const handleRespondToRequest = async (requestId, status) => {
-    try {
-      await axiosInstance.post('/friend-requests/respond', {
-        requestId,
-        status,
-      });
-      dispatch(setPendingRequests(pendingRequests.filter(request => request.id !== requestId)));
-      if (status === 'ACCEPTED') {
-        fetchFriends();
-      }
-    } catch (error) {
-      console.error('Failed to respond to friend request:', error);
     }
   };
 
@@ -140,17 +112,6 @@ export const FriendsListPage = () => {
             <Button onClick={() => handleRemoveFriend(friend.id)}>삭제</Button>
           </ListItem>
         )) : <p>친구를 추가해 주세요</p>}
-      </List>
-
-      <h2>친구 요청</h2>
-      <List>
-        {Array.isArray(pendingRequests) ? pendingRequests.map((request) => (
-          <ListItem key={request.id}>
-            <ListItemText primary={`${request.requesterUsername}님으로부터 친구 요청이 도착했습니다.`} />
-            <Button onClick={() => handleRespondToRequest(request.id, 'ACCEPTED')}>수락</Button>
-            <Button onClick={() => handleRespondToRequest(request.id, 'REJECTED')}>거절</Button>
-          </ListItem>
-        )) : <p>받은 친구 요청이 없습니다.</p>}
       </List>
 
       <h2>친구 찾기</h2>
