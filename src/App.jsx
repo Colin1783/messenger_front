@@ -1,21 +1,30 @@
-import React, {useEffect} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {BrowserRouter as Router, Navigate, Route, Routes} from 'react-router-dom';
 import {useDispatch, useSelector} from 'react-redux';
-import {LoginPage} from "./pages/LoginPage.jsx";
-import {RegisterPage} from "./pages/RegisterPage.jsx";
+import {LoginPage} from "./pages/user/LoginPage.jsx";
+import {RegisterPage} from "./pages/user/RegisterPage.jsx";
 import {Home} from "./pages/Home.jsx";
 import {MainPage} from "./pages/MainPage.jsx";
-import {ChatContainer} from "./pages/ChatContainer.jsx";
-import {ChatPage} from "./pages/ChatPage.jsx";
-import {SettingsPage} from "./pages/SettingsPage.jsx";
-import {FriendsListPage} from "./pages/FriendsListPage.jsx"; // Import FriendsListPage
-import {logout} from './redux/authSlice.js';
+import {ChatContainer} from "./pages/chat/ChatContainer.jsx";
+import {Chat} from "./pages/chat/Chat.jsx";
+import {SettingsPage} from "./pages/user/SettingsPage.jsx";
+import {FriendsListPage} from "./pages/friend/FriendsListPage.jsx";
+import {login, logout} from './redux/authSlice.js';
 import {connect, disconnect} from "./app/websocketService.js";
 import {NotificationComponent} from "./components/NotificationComponent.jsx";
 
 const App = () => {
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  let lastHiddenTime = null;
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (token && user) {
+      dispatch(login({ token, user }));
+    }
+  }, [dispatch]);
 
   useEffect(() => {
     console.log("isAuthenticated state changed:", isAuthenticated);
@@ -32,9 +41,60 @@ const App = () => {
     };
   }, [isAuthenticated]);
 
-  const handleLogout = () => {
+  useEffect(() => {
+    let idleTime = 0;
+    let interval;
+
+    const timerIncrement = () => {
+      idleTime++;
+      if (idleTime > 30) { // 30분 이상 활동이 없으면 로그아웃
+        alert('30분 동안 활동이 없어 로그아웃됩니다.');
+        dispatch(logout());
+      }
+    };
+
+    const resetTimer = () => {
+      idleTime = 0;
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        lastHiddenTime = new Date();
+        clearInterval(interval);
+      } else {
+        const currentTime = new Date();
+        if (lastHiddenTime) {
+          const hiddenDuration = (currentTime - lastHiddenTime) / 60000; // minutes
+          idleTime += hiddenDuration;
+        }
+        if (idleTime > 30) {
+          alert('30분 동안 활동이 없어 로그아웃됩니다.');
+          dispatch(logout());
+        } else {
+          interval = setInterval(timerIncrement, 60000); // Restart the timer
+        }
+        lastHiddenTime = null; // Reset last hidden time
+      }
+    };
+
+    interval = setInterval(timerIncrement, 60000);
+
+    window.addEventListener('mousemove', resetTimer);
+    window.addEventListener('keypress', resetTimer);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // 컴포넌트 언마운트 시 이벤트 리스너와 타이머 제거
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('mousemove', resetTimer);
+      window.removeEventListener('keypress', resetTimer);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [dispatch]);
+
+  const handleLogout = useCallback(() => {
     dispatch(logout());
-  };
+  }, [dispatch]);
 
   return (
     <Router>
@@ -47,13 +107,13 @@ const App = () => {
         >
           <Route index element={<MainPage />} />
           <Route path="chat" element={<ChatContainer />}>
-            <Route path=":id" element={<ChatPage />} />
+            <Route path=":id" element={<Chat />} />
           </Route>
           <Route path="settings" element={<SettingsPage />} />
-          <Route path="friends" element={<FriendsListPage />} /> {/* Add FriendsListPage route */}
+          <Route path="friends" element={<FriendsListPage />} />
         </Route>
       </Routes>
-      {isAuthenticated && <NotificationComponent />} {/* Add NotificationComponent here */}
+      {isAuthenticated && <NotificationComponent />}
     </Router>
   );
 };

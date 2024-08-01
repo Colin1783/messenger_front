@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import axiosInstance from '../utils/axiosInstance';
+import axiosInstance from '../../utils/axiosInstance.js';
 import {Button, CircularProgress, List, ListItem, ListItemText, TextField, Typography} from '@mui/material';
 import {useDispatch, useSelector} from 'react-redux';
 import {useNavigate} from 'react-router-dom';
-import {connect, disconnect} from '../app/websocketService';
-import {acceptFriendRequest, addFriendRequest, fetchPendingRequests, setFriends} from '../redux/friendsSlice';
+import {connect, disconnect} from '../../app/websocketService.js';
+import {acceptFriendRequest, addFriendRequest, fetchPendingRequests, setFriends} from '../../redux/friendsSlice.js';
 
 export const FriendsListPage = () => {
   const user = useSelector((state) => state.auth.user);

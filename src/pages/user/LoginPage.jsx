@@ -3,7 +3,7 @@ import {useDispatch} from 'react-redux';
 import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import {Box, Button, Container, TextField, Typography} from '@mui/material';
-import {login} from '../redux/authSlice.js';
+import {login} from '../../redux/authSlice.js';
 
 export const LoginPage = () => {
   const [username, setUsername] = useState('');

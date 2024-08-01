@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import axiosInstance from '../utils/axiosInstance';
+import axiosInstance from '../../utils/axiosInstance.js';
 import {List, ListItem, ListItemText} from '@mui/material';
 import {useNavigate} from 'react-router-dom';
 import {useSelector} from 'react-redux';
 
-export const ChatListPage = () => {
+export const ChatList = () => {
   const [chatRooms, setChatRooms] = useState([]);
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);

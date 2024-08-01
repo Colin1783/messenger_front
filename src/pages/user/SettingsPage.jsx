@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {useSelector} from 'react-redux';
-import axiosInstance from '../utils/axiosInstance';
+import axiosInstance from '../../utils/axiosInstance.js';
 import {Box, Button, Container, TextField, Typography} from '@mui/material';
 
 export const SettingsPage = () => {

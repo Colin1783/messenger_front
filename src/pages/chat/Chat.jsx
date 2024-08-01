@@ -1,14 +1,14 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {useParams} from 'react-router-dom';
-import {connect, disconnect, sendMessage} from '../app/websocketService';
+import {connect, disconnect, sendMessage} from '../../app/websocketService.js';
 import {useDispatch, useSelector} from 'react-redux';
 import {Box, Button, CircularProgress, Paper, TextField, Typography} from '@mui/material';
-import axiosInstance from '../utils/axiosInstance';
-import {addMessage} from '../redux/chatSlice.js';
+import axiosInstance from '../../utils/axiosInstance.js';
+import {addMessage} from '../../redux/chatSlice.js';
 import {format, parseISO} from 'date-fns';
 import {ko} from 'date-fns/locale';
 
-export const ChatPage = () => {
+export const Chat = () => {
   const { id: chatRoomId } = useParams();
   const user = useSelector((state) => state.auth.user);
   const messages = useSelector((state) => state.chat.messages);
