@@ -19,6 +19,7 @@ export const FriendsListPage = () => {
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [friendRequestStatus, setFriendRequestStatus] = useState('');
+  const [searchError, setSearchError] = useState('');
 
   const fetchFriends = async () => {
     if (!userId) return;
@@ -58,7 +59,13 @@ export const FriendsListPage = () => {
   }, [userId, dispatch]);
 
   const handleSearch = async () => {
+    if (searchQuery.length < 3) {
+      setSearchError('검색어는 최소 3글자 이상이어야 합니다.');
+      return;
+    }
+
     setLoadingSearch(true);
+    setSearchError('');
     try {
       const response = await axiosInstance.get(`/users/search?query=${searchQuery}`);
       setSearchResults(response.data);
@@ -123,13 +130,17 @@ export const FriendsListPage = () => {
         <CircularProgress />
       ) : (
         <List>
-          {Array.isArray(friends) ? friends.map((friend) => (
-            <ListItem key={friend.id}>
-              <ListItemText primary={friend.name} secondary={friend.email} />
-              <Button onClick={() => handleStartChat(friend.id)} variant="contained" color="primary">채팅하기</Button>
-              <Button onClick={() => handleRemoveFriend(friend.id)} variant="contained" color="secondary">삭제</Button>
-            </ListItem>
-          )) : <p>친구를 추가해 주세요</p>}
+          {friends.length > 0 ? (
+            friends.map((friend) => (
+              <ListItem key={friend.id}>
+                <ListItemText primary={friend.name} secondary={friend.email} />
+                <Button onClick={() => handleStartChat(friend.id)} variant="contained" color="primary">채팅하기</Button>
+                <Button onClick={() => handleRemoveFriend(friend.id)} variant="contained" color="secondary">삭제</Button>
+              </ListItem>
+            ))
+          ) : (
+            <Typography>친구를 추가해 주세요</Typography>
+          )}
         </List>
       )}
 
@@ -140,7 +151,8 @@ export const FriendsListPage = () => {
         onChange={(e) => setSearchQuery(e.target.value)}
         fullWidth
       />
-      <Button onClick={handleSearch} variant="contained" color="primary" style={{marginTop: '10px'}}>찾기</Button>
+      <Button onClick={handleSearch} variant="contained" color="primary" style={{ marginTop: '10px' }}>찾기</Button>
+      {searchError && <Typography color="error">{searchError}</Typography>}
       {loadingSearch ? (
         <CircularProgress />
       ) : (
@@ -150,13 +162,13 @@ export const FriendsListPage = () => {
               <ListItemText primary={user.name} secondary={user.email} />
               {friends.some(friend => friend.id === user.id) ? (
                 <Button disabled variant="outlined">추가된 친구</Button>
-              ) : pendingRequests.some(request => request.recipientId === user.id || request.requesterId === userId) ? (
+              ) : pendingRequests.some(request => (request.recipientId === user.id && request.requesterId === userId) || (request.recipientId === userId && request.requesterId === user.id)) ? (
                 <Button disabled variant="outlined">요청 완료</Button>
               ) : (
                 <Button onClick={() => handleSendFriendRequest(user.id)} variant="contained" color="primary">친구 요청</Button>
               )}
             </ListItem>
-          )) : <p>존재하지 않는 ID입니다.</p>}
+          )) : <Typography>존재하지 않는 ID입니다.</Typography>}
         </List>
       )}
       {friendRequestStatus && <Typography variant="body2" color="textSecondary">{friendRequestStatus}</Typography>}
