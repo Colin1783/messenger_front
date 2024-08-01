@@ -24,6 +24,7 @@
     "date-fns": "^3.6.0",
     "prettier": "^3.3.3",
     "react": "^18.3.1",
+    "react-calendar": "^5.0.0",
     "react-dom": "^18.3.1",
     "react-modal": "^3.16.1",
     "react-redux": "^9.1.2",

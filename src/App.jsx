@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect} from 'react';
-import {BrowserRouter as Router, Navigate, Route, Routes} from 'react-router-dom';
+import {createBrowserRouter, Navigate, RouterProvider} from 'react-router-dom';
 import {useDispatch, useSelector} from 'react-redux';
 import {LoginPage} from "./pages/user/LoginPage.jsx";
 import {RegisterPage} from "./pages/user/RegisterPage.jsx";
@@ -9,6 +9,10 @@ import {ChatContainer} from "./pages/chat/ChatContainer.jsx";
 import {Chat} from "./pages/chat/Chat.jsx";
 import {SettingsPage} from "./pages/user/SettingsPage.jsx";
 import {FriendsListPage} from "./pages/friend/FriendsListPage.jsx";
+import {BoardList} from "./pages/board/BoardList.jsx";
+import {BoardWrite} from "./pages/board/BoardWrite.jsx";
+import BoardDetail from "./pages/board/BoardDetail.jsx";
+import BoardEdit from "./pages/board/BoardEdit.jsx"; // 추가된 컴포넌트
 import {login, logout} from './redux/authSlice.js';
 import {connect, disconnect} from "./app/websocketService.js";
 import {NotificationComponent} from "./components/NotificationComponent.jsx";
@@ -96,25 +100,66 @@ const App = () => {
     dispatch(logout());
   }, [dispatch]);
 
+  const router = createBrowserRouter([
+    {
+      path: "/login",
+      element: <LoginPage />,
+    },
+    {
+      path: "/register",
+      element: <RegisterPage />,
+    },
+    {
+      path: "/*",
+      element: isAuthenticated ? <Home onLogout={handleLogout} /> : <Navigate to="/login" replace />,
+      children: [
+        {
+          index: true,
+          element: <MainPage />,
+        },
+        {
+          path: "chat",
+          element: <ChatContainer />,
+          children: [
+            {
+              path: ":id",
+              element: <Chat />,
+            },
+          ],
+        },
+        {
+          path: "settings",
+          element: <SettingsPage />,
+        },
+        {
+          path: "friends",
+          element: <FriendsListPage />,
+        },
+        {
+          path: "board",
+          element: <BoardList />,
+        },
+        {
+          path: "board/new",
+          element: <BoardWrite />,
+        },
+        {
+          path: "board/:id",
+          element: <BoardDetail />,
+        },
+        {
+          path: "board/edit/:id",
+          element: <BoardEdit />,
+        },
+      ],
+    },
+  ]);
+
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route
-          path="/*"
-          element={isAuthenticated ? <Home onLogout={handleLogout} /> : <Navigate to="/login" replace />}
-        >
-          <Route index element={<MainPage />} />
-          <Route path="chat" element={<ChatContainer />}>
-            <Route path=":id" element={<Chat />} />
-          </Route>
-          <Route path="settings" element={<SettingsPage />} />
-          <Route path="friends" element={<FriendsListPage />} />
-        </Route>
-      </Routes>
+    <>
+      <RouterProvider router={router} />
       {isAuthenticated && <NotificationComponent />}
-    </Router>
+    </>
   );
 };
 
