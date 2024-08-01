@@ -4,12 +4,13 @@ import {Button, List, ListItem, ListItemText, TextField} from '@mui/material';
 import {useDispatch, useSelector} from 'react-redux';
 import {useNavigate} from 'react-router-dom';
 import {connect, disconnect} from '../app/websocketService';
-import {acceptFriendRequest, addFriendRequest, setFriends} from '../redux/friendsSlice';
+import {acceptFriendRequest, addFriendRequest, fetchPendingRequests, setFriends} from '../redux/friendsSlice';
 
 export const FriendsListPage = () => {
   const user = useSelector((state) => state.auth.user);
   const userId = user ? user.id : null;
   const friends = useSelector((state) => state.friends.friends);
+  const pendingRequests = useSelector((state) => state.friends.pendingRequests);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -28,7 +29,10 @@ export const FriendsListPage = () => {
   };
 
   useEffect(() => {
-    fetchFriends();
+    if (userId) {
+      fetchFriends();
+      dispatch(fetchPendingRequests(userId));
+    }
 
     const onMessageReceived = (message) => {
       console.log('Message received from WebSocket:', message);
@@ -64,7 +68,7 @@ export const FriendsListPage = () => {
           recipientId,
         },
       });
-      alert('Friend request sent!');
+      dispatch(fetchPendingRequests(userId)); // Pending requests 업데이트
     } catch (error) {
       console.error('Failed to send friend request:', error);
     }
@@ -127,6 +131,8 @@ export const FriendsListPage = () => {
             <ListItemText primary={user.name} secondary={user.email} />
             {friends.some(friend => friend.id === user.id) ? (
               <Button disabled>추가된 친구</Button>
+            ) : pendingRequests.some(request => request.recipientId === user.id || request.requesterId === userId) ? (
+              <Button disabled>요청 완료</Button>
             ) : (
               <Button onClick={() => handleSendFriendRequest(user.id)}>친구 요청</Button>
             )}

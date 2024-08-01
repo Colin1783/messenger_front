@@ -1,4 +1,5 @@
 import {createSlice} from '@reduxjs/toolkit';
+import axiosInstance from '../utils/axiosInstance';
 
 const initialState = {
   pendingRequests: [],
@@ -31,4 +32,16 @@ const friendsSlice = createSlice({
 });
 
 export const { setFriends, setPendingRequests, addFriendRequest, acceptFriendRequest, addNotification } = friendsSlice.actions;
+
+export const fetchPendingRequests = (userId) => async (dispatch) => {
+  try {
+    console.log('Fetching pending requests for userId:', userId);
+    const response = await axiosInstance.get(`/friend-requests/pending/${userId}`);
+    console.log('Fetched pending requests:', response.data);
+    dispatch(setPendingRequests(response.data));
+  } catch (error) {
+    console.error('Failed to fetch pending requests:', error);
+  }
+};
+
 export default friendsSlice.reducer;

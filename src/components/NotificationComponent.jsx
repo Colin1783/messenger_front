@@ -23,22 +23,27 @@ export const NotificationComponent = () => {
   const notifications = useSelector((state) => state.notifications.notifications);
   const pendingRequests = useSelector((state) => state.friends.pendingRequests);
   const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user')); // user 정보를 JSON 파싱
+  const userId = user ? user.id : null; // userId 가져오기
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
 
   useEffect(() => {
+    console.log('Fetching initial notifications for userId:', userId); // 로그 추가
     const fetchNotifications = async () => {
       try {
-        const response = await axiosInstance.get('/friend-requests/pending/' + localStorage.getItem('userId')); // 사용자 ID를 이용해 초기 알림 가져오기
+        const response = await axiosInstance.get('/friend-requests/pending/' + userId); // 사용자 ID를 이용해 초기 알림 가져오기
         dispatch(setNotifications(response.data));
       } catch (error) {
         console.error('Failed to fetch notifications:', error);
       }
     };
 
-    fetchNotifications();
+    if (userId) {
+      fetchNotifications();
+    }
 
     const eventSourceUrl = `http://localhost:8080/friend-requests/notifications?token=${token}`;
     const eventSource = new EventSource(eventSourceUrl);
@@ -59,7 +64,7 @@ export const NotificationComponent = () => {
       console.log('Closing EventSource.');
       eventSource.close();
     };
-  }, [dispatch, token]);
+  }, [dispatch, token, userId]);
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -69,20 +74,20 @@ export const NotificationComponent = () => {
     setAnchorEl(null);
   };
 
-  const handleRespondToRequest = async (requestId, requesterId, recipientId, status, requesterUsername) => {
+  const handleRespondToRequest = async (id, requesterId, recipientId, status, requesterUsername) => {
     try {
-      console.log('Sending response to friend request:', { requestId, requesterId, recipientId, status, requesterUsername });
+      console.log('Sending response to friend request:', { id, requesterId, recipientId, status, requesterUsername });
       await axiosInstance.post('/friend-requests/respond', {
-        requestId,
+        id,
         requesterId,
         recipientId,
         status,
         requesterUsername,
       });
-      dispatch(setPendingRequests(pendingRequests.filter((request) => request.id !== requestId)));
-      dispatch(setNotifications(notifications.filter((notification) => notification.requestId !== requestId))); // 알림 제거
+      dispatch(setPendingRequests(pendingRequests.filter((request) => request.id !== id)));
+      dispatch(setNotifications(notifications.filter((notification) => notification.id !== id))); // 알림 제거
       if (status === 'ACCEPTED') {
-        dispatch(acceptFriendRequest({ requestId }));
+        dispatch(acceptFriendRequest({ id }));
         setModalMessage('친구로 추가되었습니다. 채팅을 시작해보세요.');
       } else {
         setModalMessage('거절하였습니다.');
@@ -108,8 +113,8 @@ export const NotificationComponent = () => {
             <MenuItem key={index}>
               <ListItemText primary={`${notification.requesterUsername}님으로부터 친구 요청이 도착했습니다.`} />
               <div>
-                <Button onClick={() => handleRespondToRequest(notification.requestId, notification.requesterId, notification.recipientId, 'ACCEPTED', notification.requesterUsername)}>수락</Button>
-                <Button onClick={() => handleRespondToRequest(notification.requestId, notification.requesterId, notification.recipientId, 'REJECTED', notification.requesterUsername)}>거절</Button>
+                <Button onClick={() => handleRespondToRequest(notification.id, notification.requesterId, notification.recipientId, 'ACCEPTED', notification.requesterUsername)}>수락</Button>
+                <Button onClick={() => handleRespondToRequest(notification.id, notification.requesterId, notification.recipientId, 'REJECTED', notification.requesterUsername)}>거절</Button>
               </div>
             </MenuItem>
           ))
