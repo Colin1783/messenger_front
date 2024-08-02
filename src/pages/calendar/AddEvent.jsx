@@ -14,9 +14,15 @@ const AddEventPage = () => {
   const [description, setDescription] = useState('');
   const [start, setStart] = useState(dayjs(date));
   const [end, setEnd] = useState(dayjs(date).add(1, 'hour'));
+  const [error, setError] = useState('');
   const user = useSelector((state) => state.auth.user);
 
   const handleClick = async () => {
+    if (start.isAfter(end)) {
+      setError('시작 날짜는 종료 날짜보다 늦을 수 없습니다.');
+      return;
+    }
+
     try {
       const eventData = {
         title,
@@ -26,11 +32,10 @@ const AddEventPage = () => {
         userId: user.id,
       };
       await axiosInstance.post('/events', eventData);
-      alert('Event added successfully!');
-      navigate('/calendar'); // Navigate to CalendarPage after successful addition
+      navigate('/calendar'); // 성공적으로 추가된 후 캘린더 페이지로 이동
     } catch (error) {
-      console.error('Failed to add event:', error);
-      alert('Failed to add event.');
+      console.error('일정 추가 실패:', error);
+      setError(`일정 추가 실패: ${error.response ? error.response.data.message : error.message}`);
     }
   };
 
@@ -38,9 +43,9 @@ const AddEventPage = () => {
     <Container maxWidth="sm">
       <Box display="flex" flexDirection="column" alignItems="center" mt={4}>
         <Typography variant="h4" component="h1" gutterBottom>
-          {date}
+          {date}의 일정 추가
         </Typography>
-        <Box component="form" sx={{ mt: 2 }}>
+        <Box component="form" sx={{ mt: 2, width: '100%' }}>
           <TextField
             fullWidth
             label="할 일"
@@ -48,6 +53,8 @@ const AddEventPage = () => {
             onChange={(e) => setTitle(e.target.value)}
             margin="normal"
             required
+            error={Boolean(error)}
+            helperText={error && '필수 항목입니다.'}
           />
           <TextField
             fullWidth
@@ -58,34 +65,60 @@ const AddEventPage = () => {
             multiline
             rows={4}
             required
+            error={Boolean(error)}
+            helperText={error && '필수 항목입니다.'}
           />
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Box
               sx={{
                 mt: 2,
                 display: 'flex',
-                gap: 2, // Adjust the gap value to your preference
+                gap: 2,
+                flexDirection: { xs: 'column', sm: 'row' },
               }}
             >
               <DateTimePicker
                 label="일정 시작"
                 value={start}
                 onChange={(newValue) => setStart(newValue)}
-                renderInput={(params) => <TextField {...params} fullWidth margin="normal" required />}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    fullWidth
+                    margin="normal"
+                    required
+                    error={Boolean(error)}
+                    helperText={error && '유효한 날짜를 선택하세요.'}
+                  />
+                )}
               />
               <DateTimePicker
                 label="일정 종료"
                 value={end}
                 onChange={(newValue) => setEnd(newValue)}
-                renderInput={(params) => <TextField {...params} fullWidth margin="normal" required />}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    fullWidth
+                    margin="normal"
+                    required
+                    error={Boolean(error)}
+                    helperText={error && '유효한 날짜를 선택하세요.'}
+                  />
+                )}
               />
             </Box>
           </LocalizationProvider>
+          {error && (
+            <Typography color="error" variant="body2" sx={{ mt: 2 }}>
+              {error}
+            </Typography>
+          )}
           <Button
             onClick={handleClick}
             variant="contained"
             color="primary"
-            sx={{ mt: 2 }}
+            sx={{ mt: 2, width: '100%' }}
           >
             일정 추가
           </Button>

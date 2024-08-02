@@ -17,9 +17,10 @@ const CalendarPage = () => {
       try {
         const response = await axiosInstance.get('/events');
         setEvents(response.data.map(event => ({
+          id: event.id,
           title: event.title,
-          start: event.start,  // 이벤트 시작 시간
-          end: event.end      // 이벤트 종료 시간
+          start: event.start,
+          end: event.end
         })));
       } catch (error) {
         console.error('Failed to fetch events:', error);
@@ -33,15 +34,20 @@ const CalendarPage = () => {
     navigate(`/calendar/${arg.dateStr}`);
   };
 
+  const handleEventClick = (info) => {
+    navigate(`/calendar/event/${info.event.id}`);
+  };
+
   return (
     <Container maxWidth="lg">
       <Box display="flex" flexDirection="column" alignItems="center" mt={2}>
-        <Paper elevation={3} sx={{ p: 2, width: '100%', height: '90vh' }}>
+        <Paper elevation={3} sx={{p: 2, width: '100%', height: '90vh'}}>
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
             events={events}
             dateClick={handleDateClick}
+            eventClick={handleEventClick}
             headerToolbar={{
               left: 'prev,next today',
               center: 'title',
@@ -49,28 +55,33 @@ const CalendarPage = () => {
             }}
             height="auto"
             contentHeight="80vh"
+            eventTimeFormat={{
+
+              hour: 'numeric',
+              meridiem: 'short'
+            }}
             views={{
               dayGridMonth: {
-                titleFormat: { year: 'numeric', month: 'long' },
+                titleFormat: {year: 'numeric', month: 'long'},
                 dayMaxEventRows: 2
               },
               timeGridWeek: {
-                titleFormat: { year: 'numeric', month: 'long', day: 'numeric' },
+                titleFormat: {year: 'numeric', month: 'long', day: 'numeric'},
                 slotDuration: '01:00:00',
                 slotLabelFormat: [
-                  { hour: '2-digit', minute: '2-digit', meridiem: false },
+                  {hour: '2-digit', meridiem: false},
                 ]
               },
               timeGridDay: {
-                titleFormat: { year: 'numeric', month: 'long', day: 'numeric' },
+                titleFormat: {year: 'numeric', month: 'long', day: 'numeric'},
                 slotDuration: '01:00:00',
                 slotLabelFormat: [
-                  { hour: '2-digit', minute: '2-digit', hour12: false },
+                  {hour: '2-digit', hour12: false},
                 ]
               }
             }}
             dayCellContent={(dayCell) => (
-              <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div style={{height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
                 <div>{dayCell.date.getDate()}</div>
               </div>
             )}

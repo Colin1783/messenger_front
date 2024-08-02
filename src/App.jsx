@@ -18,6 +18,7 @@ import AddEventPage from "./pages/calendar/AddEvent.jsx";
 import {login, logout} from './redux/authSlice.js';
 import {connect, disconnect} from "./app/websocketService.js";
 import {NotificationComponent} from "./components/NotificationComponent.jsx";
+import {CalendarDetailPage} from "./pages/calendar/CalendarDetail.jsx";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -160,6 +161,10 @@ const App = () => {
         {
           path: "calendar/:date",
           element: <AddEventPage />,
+        },
+        {
+          path: "calendar/event/:id",
+          element: <CalendarDetailPage />,
         },
       ],
     },
