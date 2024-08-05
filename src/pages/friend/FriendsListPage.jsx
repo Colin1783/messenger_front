@@ -26,10 +26,10 @@ export const FriendsListPage = () => {
     setLoadingFriends(true);
     try {
       const response = await axiosInstance.get(`/friends/${userId}`);
-      console.log('Fetched friends:', response.data);
+      console.log('친구 목록을 가져왔습니다:', response.data);
       dispatch(setFriends(response.data));
     } catch (error) {
-      console.error('Failed to fetch friends:', error);
+      console.error('친구 목록을 가져오는 데 실패했습니다:', error);
     } finally {
       setLoadingFriends(false);
     }
@@ -42,7 +42,7 @@ export const FriendsListPage = () => {
     }
 
     const onMessageReceived = (message) => {
-      console.log('Message received from WebSocket:', message);
+      console.log('WebSocket으로부터 메시지를 받았습니다:', message);
       if (message.type === 'friendRequest') {
         dispatch(addFriendRequest(message));
       } else if (message.type === 'friendRequestAccepted') {
@@ -68,9 +68,10 @@ export const FriendsListPage = () => {
     setSearchError('');
     try {
       const response = await axiosInstance.get(`/users/search?query=${searchQuery}`);
-      setSearchResults(response.data);
+      const filteredResults = response.data.filter(user => user.id !== userId); // 자신을 제외
+      setSearchResults(filteredResults);
     } catch (error) {
-      console.error('Failed to search users:', error);
+      console.error('사용자 검색에 실패했습니다:', error);
     } finally {
       setLoadingSearch(false);
     }
@@ -87,7 +88,7 @@ export const FriendsListPage = () => {
       dispatch(fetchPendingRequests(userId)); // Pending requests 업데이트
       setFriendRequestStatus('친구 요청이 성공적으로 보내졌습니다.');
     } catch (error) {
-      console.error('Failed to send friend request:', error);
+      console.error('친구 요청을 보내는 데 실패했습니다:', error);
       setFriendRequestStatus('친구 요청을 보내는 데 실패했습니다.');
     }
   };
@@ -103,7 +104,7 @@ export const FriendsListPage = () => {
       const chatRoomId = response.data.id;
       navigate(`/chat/${chatRoomId}`);
     } catch (error) {
-      console.error('Failed to start chat:', error);
+      console.error('채팅을 시작하는 데 실패했습니다:', error);
     }
   };
 
@@ -115,12 +116,12 @@ export const FriendsListPage = () => {
       });
       fetchFriends();
     } catch (error) {
-      console.error('Failed to remove friend:', error);
+      console.error('친구 삭제에 실패했습니다:', error);
     }
   };
 
   if (!userId) {
-    return <p>Loading...</p>; // 유저 아이디를 불러올 때까지 Loading 상태 표시
+    return <p>로딩 중...</p>; // 유저 아이디를 불러올 때까지 로딩 상태 표시
   }
 
   return (
@@ -146,10 +147,15 @@ export const FriendsListPage = () => {
 
       <h2>친구 찾기</h2>
       <TextField
-        label="Search"
+        label="검색"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         fullWidth
+        onKeyPress={(e) => {
+          if (e.key === 'Enter') {
+            handleSearch();
+          }
+        }}
       />
       <Button onClick={handleSearch} variant="contained" color="primary" style={{ marginTop: '10px' }}>찾기</Button>
       {searchError && <Typography color="error">{searchError}</Typography>}
@@ -168,7 +174,7 @@ export const FriendsListPage = () => {
                 <Button onClick={() => handleSendFriendRequest(user.id)} variant="contained" color="primary">친구 요청</Button>
               )}
             </ListItem>
-          )) : <Typography>존재하지 않는 ID입니다.</Typography>}
+          )) : <Typography>검색 결과가 없습니다.</Typography>}
         </List>
       )}
       {friendRequestStatus && <Typography variant="body2" color="textSecondary">{friendRequestStatus}</Typography>}

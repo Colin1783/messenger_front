@@ -29,7 +29,7 @@ export const BoardList = () => {
   useEffect(() => {
     axios.get('/board')
       .then(response => setPosts(response.data))
-      .catch(error => console.error('Error fetching posts:', error));
+      .catch(error => console.error('게시글을 가져오는 데 실패했습니다:', error));
   }, []);
 
   const handleChangePage = (event, newPage) => {

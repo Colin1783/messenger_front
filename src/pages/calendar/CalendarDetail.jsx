@@ -27,7 +27,7 @@ export const CalendarDetailPage = () => {
         setStart(dayjs(event.start));
         setEnd(dayjs(event.end));
       } catch (error) {
-        console.error('Failed to fetch event:', error);
+        console.error('일정을 불러오는 데 실패했습니다:', error);
         setError('일정을 불러오는 데 실패했습니다.');
       }
     };
@@ -163,4 +163,3 @@ export const CalendarDetailPage = () => {
     </Container>
   );
 };
-

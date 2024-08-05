@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {useSelector} from 'react-redux';
 import axiosInstance from '../../utils/axiosInstance.js';
-import {Box, Button, Container, TextField, Typography} from '@mui/material';
+import {Box, Button, Container, Paper, TextField, Typography} from '@mui/material';
 
 export const SettingsPage = () => {
   const user = useSelector((state) => state.auth.user);
@@ -26,24 +26,24 @@ export const SettingsPage = () => {
         currentPassword,
         newPassword,
       });
-      setSuccess('Profile updated successfully');
+      setSuccess('프로필이 성공적으로 업데이트되었습니다.');
       setError('');
     } catch (err) {
-      setError('Update failed. Please try again.');
+      setError('업데이트 실패. 다시 시도해 주세요.');
       setSuccess('');
     }
   };
 
   return (
     <Container maxWidth="sm">
-      <Box mt={5}>
+      <Paper elevation={3} sx={{ p: 4, mt: 5 }}>
         <Typography variant="h4" gutterBottom>
-          Settings
+          설정
         </Typography>
         <form onSubmit={handleUpdate}>
           <Box mb={2}>
             <TextField
-              label="Username"
+              label="사용자명"
               variant="outlined"
               fullWidth
               value={user.username}
@@ -54,7 +54,7 @@ export const SettingsPage = () => {
           </Box>
           <Box mb={2}>
             <TextField
-              label="Email"
+              label="이메일"
               variant="outlined"
               fullWidth
               value={email}
@@ -63,7 +63,7 @@ export const SettingsPage = () => {
           </Box>
           <Box mb={2}>
             <TextField
-              label="Name"
+              label="이름"
               variant="outlined"
               fullWidth
               value={name}
@@ -72,7 +72,7 @@ export const SettingsPage = () => {
           </Box>
           <Box mb={2}>
             <TextField
-              label="Birthdate"
+              label="생년월일"
               type="date"
               variant="outlined"
               fullWidth
@@ -85,7 +85,7 @@ export const SettingsPage = () => {
           </Box>
           <Box mb={2}>
             <TextField
-              label="Cellphone"
+              label="휴대폰 번호"
               variant="outlined"
               fullWidth
               value={cellphone}
@@ -94,7 +94,7 @@ export const SettingsPage = () => {
           </Box>
           <Box mb={2}>
             <TextField
-              label="Current Password"
+              label="현재 비밀번호"
               type="password"
               variant="outlined"
               fullWidth
@@ -104,7 +104,7 @@ export const SettingsPage = () => {
           </Box>
           <Box mb={2}>
             <TextField
-              label="New Password"
+              label="새 비밀번호"
               type="password"
               variant="outlined"
               fullWidth
@@ -123,10 +123,10 @@ export const SettingsPage = () => {
             </Typography>
           )}
           <Button type="submit" variant="contained" color="primary" fullWidth>
-            Update
+            업데이트
           </Button>
         </form>
-      </Box>
+      </Paper>
     </Container>
   );
 };

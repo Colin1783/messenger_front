@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
-import {Box, Button, Container, TextField, Typography} from '@mui/material';
+import {Box, Button, Container, Paper, TextField, Typography} from '@mui/material';
 
 export const RegisterPage = () => {
   const [username, setUsername] = useState('');
@@ -26,20 +26,20 @@ export const RegisterPage = () => {
       });
       navigate('/login');
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      setError('회원가입에 실패했습니다. 다시 시도해 주세요.');
     }
   };
 
   return (
     <Container maxWidth="sm">
-      <Box mt={5}>
+      <Paper elevation={3} sx={{ p: 4, mt: 5 }}>
         <Typography variant="h4" gutterBottom>
-          Register
+          회원가입
         </Typography>
         <form onSubmit={handleRegister}>
           <Box mb={2}>
             <TextField
-              label="Username"
+              label="아이디"
               variant="outlined"
               fullWidth
               value={username}
@@ -48,7 +48,7 @@ export const RegisterPage = () => {
           </Box>
           <Box mb={2}>
             <TextField
-              label="Password"
+              label="비밀번호"
               type="password"
               variant="outlined"
               fullWidth
@@ -58,7 +58,7 @@ export const RegisterPage = () => {
           </Box>
           <Box mb={2}>
             <TextField
-              label="Email"
+              label="이메일"
               variant="outlined"
               fullWidth
               value={email}
@@ -67,7 +67,7 @@ export const RegisterPage = () => {
           </Box>
           <Box mb={2}>
             <TextField
-              label="Name"
+              label="이름"
               variant="outlined"
               fullWidth
               value={name}
@@ -76,7 +76,7 @@ export const RegisterPage = () => {
           </Box>
           <Box mb={2}>
             <TextField
-              label="Birthdate"
+              label="생년월일"
               type="date"
               variant="outlined"
               fullWidth
@@ -89,7 +89,7 @@ export const RegisterPage = () => {
           </Box>
           <Box mb={2}>
             <TextField
-              label="Cellphone"
+              label="휴대폰 번호"
               variant="outlined"
               fullWidth
               value={cellphone}
@@ -102,12 +102,10 @@ export const RegisterPage = () => {
             </Typography>
           )}
           <Button type="submit" variant="contained" color="primary" fullWidth>
-            Register
+            회원가입
           </Button>
         </form>
-      </Box>
+      </Paper>
     </Container>
   );
 };
-
-

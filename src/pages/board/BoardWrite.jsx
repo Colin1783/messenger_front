@@ -14,7 +14,7 @@ export const BoardWrite = () => {
     e.preventDefault();
     axios.post('/board', { title, content, userId: user.id })
       .then(() => navigate('/board'))
-      .catch(error => console.error('Error creating post:', error));
+      .catch(error => console.error('게시글 작성 실패:', error));
   };
 
   return (

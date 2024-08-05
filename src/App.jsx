@@ -17,7 +17,6 @@ import CalendarPage from "./pages/calendar/Calendar.jsx";
 import AddEventPage from "./pages/calendar/AddEvent.jsx";
 import {login, logout} from './redux/authSlice.js';
 import {connect, disconnect} from "./app/websocketService.js";
-import {NotificationComponent} from "./components/NotificationComponent.jsx";
 import {CalendarDetailPage} from "./pages/calendar/CalendarDetail.jsx";
 
 const App = () => {
@@ -173,7 +172,6 @@ const App = () => {
   return (
     <>
       <RouterProvider router={router} />
-      {isAuthenticated && <NotificationComponent />}
     </>
   );
 };

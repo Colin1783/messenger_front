@@ -12,7 +12,7 @@ export const NavBar = () => {
   const navigate = useNavigate();
 
   return (
-    <Box sx={{ width: 100, backgroundColor: '#f4f4f4', height: '100vh', boxShadow: 2 }}>
+    <Box sx={{ width: 100, backgroundColor: '#f4f4f4', height: '88vh', boxShadow: 2 }}>
       <List component="nav">
         <ListItem button onClick={() => navigate('/')}>
           <ListItemIcon>

@@ -31,13 +31,13 @@ export const NotificationComponent = () => {
   const [modalMessage, setModalMessage] = useState('');
 
   useEffect(() => {
-    console.log('Fetching initial notifications for userId:', userId); // 로그 추가
+    console.log('사용자 ID로 초기 알림을 가져옵니다:', userId); // 로그 추가
     const fetchNotifications = async () => {
       try {
         const response = await axiosInstance.get('/friend-requests/pending/' + userId); // 사용자 ID를 이용해 초기 알림 가져오기
         dispatch(setNotifications(response.data));
       } catch (error) {
-        console.error('Failed to fetch notifications:', error);
+        console.error('알림을 가져오는 데 실패했습니다:', error);
       }
     };
 
@@ -49,19 +49,19 @@ export const NotificationComponent = () => {
     const eventSource = new EventSource(eventSourceUrl);
 
     eventSource.addEventListener("notification", function(event) {
-      console.log('New notification received:', event.data);
+      console.log('새 알림을 받았습니다:', event.data);
       dispatch(addNotification(JSON.parse(event.data)));
     });
 
     eventSource.onerror = function(event) {
-      console.error('EventSource failed:', event);
+      console.error('EventSource 오류 발생:', event);
       eventSource.close();
     };
 
-    console.log('Subscribed to EventSource for notifications.');
+    console.log('알림을 위한 EventSource에 구독했습니다.');
 
     return () => {
-      console.log('Closing EventSource.');
+      console.log('EventSource를 닫습니다.');
       eventSource.close();
     };
   }, [dispatch, token, userId]);
@@ -76,7 +76,7 @@ export const NotificationComponent = () => {
 
   const handleRespondToRequest = async (id, requesterId, recipientId, status, requesterUsername) => {
     try {
-      console.log('Sending response to friend request:', { id, requesterId, recipientId, status, requesterUsername });
+      console.log('친구 요청에 대한 응답을 보냅니다:', { id, requesterId, recipientId, status, requesterUsername });
       await axiosInstance.post('/friend-requests/respond', {
         id,
         requesterId,
@@ -94,7 +94,7 @@ export const NotificationComponent = () => {
       }
       setModalOpen(true);
     } catch (error) {
-      console.error('Failed to respond to friend request:', error);
+      console.error('친구 요청에 응답하는 데 실패했습니다:', error);
     }
   };
 
@@ -107,7 +107,7 @@ export const NotificationComponent = () => {
       </IconButton>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
         {notifications.length === 0 ? (
-          <MenuItem onClick={handleMenuClose}>No notifications</MenuItem>
+          <MenuItem onClick={handleMenuClose}>알림이 없습니다</MenuItem>
         ) : (
           notifications.map((notification, index) => (
             <MenuItem key={index}>

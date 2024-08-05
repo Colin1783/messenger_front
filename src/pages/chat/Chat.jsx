@@ -2,11 +2,12 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useParams} from 'react-router-dom';
 import {connect, disconnect, sendMessage} from '../../app/websocketService.js';
 import {useDispatch, useSelector} from 'react-redux';
-import {Box, Button, CircularProgress, Paper, TextField, Typography} from '@mui/material';
+import {Box, CircularProgress, IconButton, Paper, TextField, Typography} from '@mui/material';
 import axiosInstance from '../../utils/axiosInstance.js';
-import {addMessage} from '../../redux/chatSlice.js';
+import {addMessage, setMessages} from '../../redux/chatSlice.js';
 import {format, parseISO} from 'date-fns';
 import {ko} from 'date-fns/locale';
+import SendIcon from '@mui/icons-material/Send';
 
 export const Chat = () => {
   const { id: chatRoomId } = useParams();
@@ -30,21 +31,20 @@ export const Chat = () => {
           const validMessages = response.data.map((msg) => ({
             ...msg,
             chatRoomId: msg.chatRoomId || chatRoomId,
-            senderId: msg.senderId || 'Unknown',
+            senderId: msg.senderId || '알 수 없음',
             createdAt: msg.createdAt || new Date().toISOString().slice(0, 19).replace('T', ' '),
           }));
-          validMessages.forEach((msg) => {
-            dispatch(addMessage(msg));
-          });
+          dispatch(setMessages(validMessages));
         }
       } catch (error) {
-        console.error('Failed to fetch messages:', error);
+        console.error('메시지를 가져오는 데 실패했습니다:', error);
       } finally {
         setLoading(false);
       }
     };
 
     if (chatRoomId) {
+      dispatch(setMessages([])); // 기존 메시지 초기화
       fetchMessages();
       connect(onMessageReceived, chatRoomId);
     }
@@ -59,7 +59,7 @@ export const Chat = () => {
   }, [messages]);
 
   const onMessageReceived = (msg) => {
-    console.log('onMessageReceived called with message:', msg);
+    console.log('onMessageReceived 호출됨, 메시지:', msg);
     const formattedMsg = {
       ...msg,
       createdAt: new Date(msg.created_at).toISOString(),
@@ -103,13 +103,13 @@ export const Chat = () => {
   if (!chatRoomId) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Typography variant="h6">Loading chat room...</Typography>
+        <Typography variant="h6">채팅방 로딩 중...</Typography>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#fff' }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#fff' }}>
       <Box sx={{ flexGrow: 1, mb: 2, border: '1px solid #ccc', borderRadius: 1, p: 2, overflowY: 'scroll' }}>
         {messages.map((msg) => (
           <Box
@@ -137,7 +137,7 @@ export const Chat = () => {
                 {msg.content}
               </Typography>
               <Typography variant="caption" sx={{ display: 'block', textAlign: 'right' }}>
-                {msg.createdAt ? formatDate(msg.createdAt) : 'Unknown date'}
+                {msg.createdAt ? formatDate(msg.createdAt) : '알 수 없는 날짜'}
               </Typography>
             </Paper>
           </Box>
@@ -146,7 +146,7 @@ export const Chat = () => {
       </Box>
       <form onSubmit={handleSend} style={{ display: 'flex', gap: '8px' }}>
         <TextField
-          label="Message"
+          label="메시지"
           fullWidth
           value={message}
           onChange={(e) => setMessage(e.target.value)}
@@ -155,9 +155,9 @@ export const Chat = () => {
           minRows={1}
           maxRows={4}
         />
-        <Button type="submit" variant="contained" color="primary">
-          Send
-        </Button>
+        <IconButton type="submit" color="primary" sx={{ p: '10px' }}>
+          <SendIcon />
+        </IconButton>
       </form>
     </Box>
   );

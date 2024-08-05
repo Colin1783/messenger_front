@@ -1,6 +1,6 @@
 import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {AppBar, Box, Button, IconButton, TextField, Toolbar, Typography} from '@mui/material';
+import {AppBar, Button, IconButton, Toolbar, Typography} from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import {useNavigate} from 'react-router-dom';
 import {logout} from "../redux/authSlice";
@@ -23,40 +23,6 @@ const Header = () => {
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           콜챗 메신저
         </Typography>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            backgroundColor: 'white',
-            borderRadius: '4px',
-            padding: '2px 8px',
-            marginRight: 2,
-          }}
-        >
-          <TextField
-            id="outlined-basic"
-            label="Search"
-            variant="outlined"
-            size="small"
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'rgba(0, 0, 0, 0.23)',
-                },
-                '&:hover fieldset': {
-                  borderColor: 'rgba(0, 0, 0, 0.23)',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'rgba(0, 0, 0, 0.23)',
-                },
-              },
-              marginRight: 1,
-            }}
-          />
-          <Button variant="contained" color="primary">
-            <Typography variant="button" color="inherit">검색</Typography>
-          </Button>
-        </Box>
         {user && ( // user가 존재할 때만 환영 메시지를 표시
           <Typography variant="body1" sx={{ marginRight: 2 }}>
             {user.username} 님 환영합니다.

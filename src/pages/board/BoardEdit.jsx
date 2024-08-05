@@ -31,7 +31,7 @@ const BoardEdit = () => {
         setLoading(false);
       })
       .catch(error => {
-        console.error('Error fetching post:', error);
+        console.error('게시글을 가져오는 데 실패했습니다:', error);
         setLoading(false);
       });
   }, [id]);
@@ -40,7 +40,7 @@ const BoardEdit = () => {
     e.preventDefault();
     axios.put(`/board/${id}`, { title, content })
       .then(() => navigate(`/board/${id}`))
-      .catch(error => console.error('Error updating post:', error));
+      .catch(error => console.error('게시글을 업데이트하는 데 실패했습니다:', error));
   };
 
   if (loading) {

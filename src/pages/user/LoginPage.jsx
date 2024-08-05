@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {useDispatch} from 'react-redux';
 import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
-import {Box, Button, Container, TextField, Typography} from '@mui/material';
+import {Box, Button, Container, Paper, TextField, Typography} from '@mui/material';
 import {login} from '../../redux/authSlice.js';
 
 export const LoginPage = () => {
@@ -23,7 +23,7 @@ export const LoginPage = () => {
       dispatch(login({ token: jwt, user }));
       navigate('/');
     } catch (err) {
-      setError('Login failed. Please check your username and password.');
+      setError('로그인에 실패했습니다. 사용자명과 비밀번호를 확인하세요.');
     }
   };
 
@@ -33,14 +33,14 @@ export const LoginPage = () => {
 
   return (
     <Container maxWidth="sm">
-      <Box mt={5}>
+      <Paper elevation={3} sx={{ p: 4, mt: 5 }}>
         <Typography variant="h4" gutterBottom>
-          Login
+          로그인
         </Typography>
         <form onSubmit={handleLogin}>
           <Box mb={2}>
             <TextField
-              label="Username"
+              label="아이디 입력"
               variant="outlined"
               fullWidth
               value={username}
@@ -49,7 +49,7 @@ export const LoginPage = () => {
           </Box>
           <Box mb={2}>
             <TextField
-              label="Password"
+              label="비밀번호"
               type="password"
               variant="outlined"
               fullWidth
@@ -63,7 +63,7 @@ export const LoginPage = () => {
             </Typography>
           )}
           <Button type="submit" variant="contained" color="primary" fullWidth>
-            Login
+            로그인
           </Button>
         </form>
         <Box mt={2}>
@@ -73,10 +73,10 @@ export const LoginPage = () => {
             fullWidth
             onClick={handleNavigateToRegister}
           >
-            Register
+            회원가입
           </Button>
         </Box>
-      </Box>
+      </Paper>
     </Container>
   );
 };

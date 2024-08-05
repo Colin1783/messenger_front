@@ -23,7 +23,7 @@ const CalendarPage = () => {
           end: event.end
         })));
       } catch (error) {
-        console.error('Failed to fetch events:', error);
+        console.error('일정을 가져오는 데 실패했습니다:', error);
       }
     };
 
@@ -56,7 +56,6 @@ const CalendarPage = () => {
             height="auto"
             contentHeight="80vh"
             eventTimeFormat={{
-
               hour: 'numeric',
               meridiem: 'short'
             }}
